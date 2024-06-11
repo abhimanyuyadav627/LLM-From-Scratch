@@ -1,4 +1,5 @@
 import torch
+import tiktoken
 import torch.nn as nn 
 from transformer_block import TransformerBlock
 from layer_normalisation import LayerNorm
@@ -15,10 +16,11 @@ GPT_CONFIG_124M = {
 
 class GPTModel(nn.Module):
     def __init__(self, configuration) -> None:
+        super().__init__()
         self.tok_emb = nn.Embedding(configuration["vocab_size"],configuration["emb_dim"])
         self.pos_emb = nn.Embedding(configuration["context_length"], configuration["emb_dim"])
         self.dropout_layer_embedding = nn.Dropout(configuration["drop_rate"])
-        self.transformer_blocks = nn.Sequential(*[TransformerBlock(configuration) for _ in configuration["n_layers"]])
+        self.transformer_blocks = nn.Sequential(*[TransformerBlock(configuration) for _ in range(configuration["n_layers"])])
         self.final_layer_norm = LayerNorm(configuration["emb_dim"])
         self.out_head = nn.Linear(configuration["emb_dim"],configuration["vocab_size"], bias = False)
     
@@ -35,3 +37,20 @@ class GPTModel(nn.Module):
         x = self.final_layer_norm(x)
         logits = self.out_head(x)
         return logits
+    
+
+if __name__ == "__main__":
+    #Sanity check code
+    tokenizer = tiktoken.get_encoding("gpt2")
+    batch = []
+    txt1 = "Every effort moves you"
+    txt2 = "Every day holds a"
+    batch.append(torch.tensor(tokenizer.encode(txt1)))
+    batch.append(torch.tensor(tokenizer.encode(txt2)))
+    batch = torch.stack(batch, dim=0)
+    print(batch)
+    torch.manual_seed(123)
+    model = GPTModel(GPT_CONFIG_124M)
+    logits = model(batch)
+    print("Output shape:", logits.shape)
+    print(logits)
