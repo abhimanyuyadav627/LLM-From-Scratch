@@ -8,16 +8,16 @@ class TransformerBlock(nn.Module):
     def __init__(self, configuration) -> None:
         super().__init__()
         self.attn = MultiHeadAttention(
-            d_in = configuration["emd_dim"],
-            d_out = configuration["emd_dim"],
+            d_in = configuration["emb_dim"],
+            d_out = configuration["emb_dim"],
             context_length = configuration["context_length"],
             num_heads = configuration["n_heads"],
             dropout = configuration["drop_rate"],
             qkv_bias = configuration["qkv_bias"]
         )
         self.ff = FeedForward(configuration)
-        self.norm1 = LayerNorm(configuration["emd_dim"])
-        self.norm2 = LayerNorm(configuration["emd_dim"])
+        self.norm1 = LayerNorm(configuration["emb_dim"])
+        self.norm2 = LayerNorm(configuration["emb_dim"])
         self.drop_shortcut = nn.Dropout(configuration["drop_rate"])
 
     def forward(self, x):
