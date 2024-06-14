@@ -37,13 +37,13 @@ def evaluate_model(model, train_dataloader, validation_dataloader, device, eval_
     model.train()
     return train_loss, val_loss
 
-def generate_and_print_sample(model, tokenizer, device, start_context, temperature):
+def generate_and_print_sample(model, tokenizer, device, start_context, temperature, top_k):
     model.eval()
     context_size = model.pos_emb.weight.shape[0]
     encoded = TextGenerator.text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
-        # token_ids = TextGenerator.generate_text_temprature(model=model, idx=encoded,max_new_tokens=50, context_size=context_size, temperature=temperature)
-        token_ids = TextGenerator.generate_text_simple(model=model, idx=encoded,max_new_tokens=50, context_size=context_size)
+        token_ids = TextGenerator.generate_text(model=model, idx=encoded,max_new_tokens=50, context_size=context_size, temperature=temperature,top_k = top_k)
+        # token_ids = TextGenerator.generate_text_simple(model=model, idx=encoded,max_new_tokens=50, context_size=context_size)
         decoded_text = TextGenerator.token_ids_to_text(token_ids, tokenizer)
         print(decoded_text.replace("\n", " ")) # Compact print format
     model.train()
@@ -60,7 +60,7 @@ def training_loop(model,train_dataloader,validation_dataloader, optimizer, devic
            optimizer.step() #4. updating model weights using computed loss gradients
            tokens_seen += input_batch.numel()
            global_step += 1
-           if global_step % eval_freq == 0: #F
+           if global_step % eval_freq == 0:
                 train_loss, val_loss = evaluate_model(
                 model, train_dataloader, validation_dataloader, device, eval_iter)
                 train_losses.append(train_loss)
@@ -70,7 +70,7 @@ def training_loop(model,train_dataloader,validation_dataloader, optimizer, devic
                 f"Train loss {train_loss:.3f}, "
                 f"Val loss {val_loss:.3f}"
                 )
-        generate_and_print_sample( model, tokenizer, device, start_context,temperature=0.1) #REMINDER: Adjust temprature over here
+        generate_and_print_sample( model, tokenizer, device, start_context,temperature=0.1, top_k = 3) #REMINDER: Adjust temprature over here
     return train_losses,val_losses,track_tokens_seen
 
 
@@ -87,17 +87,14 @@ if __name__ == "__main__":
     
     tokenizer = tiktoken.get_encoding("gpt2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # model = GPTModel(GPT_CONFIG_124M)
-    # model.to(device)
-    # with torch.no_grad():
-    #     train_loss = calculate_loss_loader(train_dataloader, model, device)
-    #     val_loss = calculate_loss_loader(test_dataloader, model, device)
-    # print("Training loss:", train_loss)
-    # print("Validation loss:", val_loss)
     torch.manual_seed(123)
     model = GPTModel(GPT_CONFIG_124M)
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-    num_epochs = 50
+    num_epochs = 1
     train_losses, val_losses, tokens_seen = training_loop(model, train_dataloader, validation_dataloader, optimizer, 
                                                                device,num_epochs=num_epochs, eval_freq=5, eval_iter=1,start_context="Every effort moves you", tokenizer=tokenizer)
+
+    #code to save the pretrained model. (saving the optimizer states so that we can continue pretraining LLM.)
+    torch.save({"model_state_dict": model.state_dict(),"optimizer_state_dict": optimizer.state_dict(),},"saved_models/model_and_optimizer.pth")
+    print("INFO: Pretrained model saved successfully.")
