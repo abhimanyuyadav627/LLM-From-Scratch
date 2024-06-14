@@ -1,11 +1,15 @@
 import torch
 import tiktoken
 import torch.nn as nn
+import os
+from dotenv import load_dotenv
 from gpt_architecture import GPTModel, GPT_CONFIG_124M
 from data_loader import create_dataloader
 from text_generation import TextGenerator
 
-#calculating loss
+# Load environment variables from .env file
+load_dotenv()
+
 def calculate_loss_batch(input_batch, target_batch, model, device):
     input_batch = input_batch.to(device)
     target_batch = target_batch.to(device)
@@ -70,7 +74,7 @@ def training_loop(model,train_dataloader,validation_dataloader, optimizer, devic
                 f"Train loss {train_loss:.3f}, "
                 f"Val loss {val_loss:.3f}"
                 )
-        generate_and_print_sample( model, tokenizer, device, start_context,temperature=0.1, top_k = 3) #REMINDER: Adjust temprature over here
+        generate_and_print_sample( model, tokenizer, device, start_context,temperature=float(os.getenv('TEMPERATURE')), top_k = int(os.getenv('TOP_K'))) #REMINDER: Adjust temprature over here
     return train_losses,val_losses,track_tokens_seen
 
 
@@ -90,10 +94,10 @@ if __name__ == "__main__":
     torch.manual_seed(123)
     model = GPTModel(GPT_CONFIG_124M)
     model.to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-    num_epochs = 1
+    optimizer = torch.optim.AdamW(model.parameters(), lr=float(os.getenv('LEARNING_RATE')), weight_decay=float(os.getenv('WEIGHT_DECAY')))
+    num_epochs = int(os.getenv('EPOCHS'))
     train_losses, val_losses, tokens_seen = training_loop(model, train_dataloader, validation_dataloader, optimizer, 
-                                                               device,num_epochs=num_epochs, eval_freq=5, eval_iter=1,start_context="Every effort moves you", tokenizer=tokenizer)
+                                                               device,num_epochs=num_epochs, eval_freq=int(os.getenv('EVAL_FREQ')), eval_iter=int(os.getenv('EVAL_ITER')),start_context=os.getenv('START_CONTEXT'), tokenizer=tokenizer)
 
     #code to save the pretrained model. (saving the optimizer states so that we can continue pretraining LLM.)
     torch.save({"model_state_dict": model.state_dict(),"optimizer_state_dict": optimizer.state_dict(),},"saved_models/model_and_optimizer.pth")
