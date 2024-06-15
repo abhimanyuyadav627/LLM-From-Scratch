@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from gpt_architecture import GPTModel, GPT_CONFIG_124M
 from data_loader import create_dataloader
 from text_generation import TextGenerator
+from load_pretrained_weights import get_gpt_with_openai_gpt2_weights
 
 # Load environment variables from .env file
 load_dotenv()
@@ -46,7 +47,7 @@ def generate_and_print_sample(model, tokenizer, device, start_context, temperatu
     context_size = model.pos_emb.weight.shape[0]
     encoded = TextGenerator.text_to_token_ids(start_context, tokenizer).to(device)
     with torch.no_grad():
-        token_ids = TextGenerator.generate_text(model=model, idx=encoded,max_new_tokens=50, context_size=context_size, temperature=temperature,top_k = top_k)
+        token_ids = TextGenerator.generate_text(model=model, idx=encoded,max_new_tokens=25, context_size=context_size, temperature=temperature,top_k = top_k)
         # token_ids = TextGenerator.generate_text_simple(model=model, idx=encoded,max_new_tokens=50, context_size=context_size)
         decoded_text = TextGenerator.token_ids_to_text(token_ids, tokenizer)
         print(decoded_text.replace("\n", " ")) # Compact print format
@@ -92,7 +93,8 @@ if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(123)
-    model = GPTModel(GPT_CONFIG_124M)
+    # model = GPTModel(GPT_CONFIG_124M)
+    model = get_gpt_with_openai_gpt2_weights()
     model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(os.getenv('LEARNING_RATE')), weight_decay=float(os.getenv('WEIGHT_DECAY')))
     num_epochs = int(os.getenv('EPOCHS'))
