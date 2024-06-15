@@ -1,7 +1,7 @@
 import numpy as np
 import torch
-from gpt_architecture import GPTModel,GPT_CONFIG_124M
-from gpt_download import download_and_load_gpt2
+from gpt_architecture.custom_gpt import GPTModel,GPT_CONFIG_124M
+from pretrain.gpt_download import download_and_load_gpt2
 import urllib.request
 
 

@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from self_attention import MultiHeadAttention
-from feed_forward import FeedForward
-from layer_normalisation import LayerNorm
+from gpt_architecture.modules.self_attention import MultiHeadAttention
+from gpt_architecture.modules.feed_forward import FeedForward
+from gpt_architecture.modules.layer_normalisation import LayerNorm
 
 class TransformerBlock(nn.Module):
     def __init__(self, configuration) -> None:

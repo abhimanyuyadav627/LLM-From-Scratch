@@ -1,6 +1,6 @@
 import torch
 import tiktoken
-from gpt_architecture import GPTModel, GPT_CONFIG_124M
+from gpt_architecture.custom_gpt import GPTModel, GPT_CONFIG_124M
 
 class TextGenerator:
     @staticmethod

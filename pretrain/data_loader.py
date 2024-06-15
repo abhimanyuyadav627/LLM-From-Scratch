@@ -1,7 +1,7 @@
 import tiktoken
 import torch
 from torch.utils.data import Dataset, DataLoader
-from gpt_architecture import GPT_CONFIG_124M
+from gpt_architecture.custom_gpt import GPT_CONFIG_124M
 
 class GPTDataset(Dataset):
     def __init__(self, input_text, tokenizer,max_length = 256, stride = 1) -> None:
@@ -31,7 +31,7 @@ def input_embedding_pipeline(txt, max_length = 256, stride = 1, batch_size = 4, 
 #REMINDER: Need to implement Embedding Layer & Positional encodings.
 
 if __name__ == "__main__":
-    with open("the-verdict.txt", "r", encoding="utf-8") as f:
+    with open("data/the-verdict.txt", "r", encoding="utf-8") as f:
         raw_text = f.read()
     
     train_ratio = 0.90

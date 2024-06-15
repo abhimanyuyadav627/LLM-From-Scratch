@@ -1,8 +1,8 @@
 import torch
 import tiktoken
 import torch.nn as nn 
-from transformer_block import TransformerBlock
-from layer_normalisation import LayerNorm
+from gpt_architecture.modules.transformer_block import TransformerBlock
+from gpt_architecture.modules.layer_normalisation import LayerNorm
 
 GPT_CONFIG_124M = {
 "vocab_size": 50257, # Vocabulary size
@@ -39,20 +39,20 @@ class GPTModel(nn.Module):
         return logits
     
 
-# if __name__ == "__main__":
-#     #Sanity check code
-#     tokenizer = tiktoken.get_encoding("gpt2")
-#     batch = []
-#     txt1 = "Every effort moves you"
-#     txt2 = "Every day holds a"
-#     batch.append(torch.tensor(tokenizer.encode(txt1)))
-#     batch.append(torch.tensor(tokenizer.encode(txt2)))
-#     batch = torch.stack(batch, dim=0)
-#     print(batch)
-#     torch.manual_seed(123)
-#     model = GPTModel(GPT_CONFIG_124M)
-#     logits = model(batch)
-#     print("Output shape:", logits.shape)
-#     print(logits)
-#     total_params = sum(p.numel() for p in model.parameters())
-#     print(f"Total number of parameters: {total_params:,}")
+if __name__ == "__main__":
+    #Sanity check code
+    tokenizer = tiktoken.get_encoding("gpt2")
+    batch = []
+    txt1 = "Every effort moves you"
+    txt2 = "Every day holds a"
+    batch.append(torch.tensor(tokenizer.encode(txt1)))
+    batch.append(torch.tensor(tokenizer.encode(txt2)))
+    batch = torch.stack(batch, dim=0)
+    print(batch)
+    torch.manual_seed(123)
+    model = GPTModel(GPT_CONFIG_124M)
+    logits = model(batch)
+    print("Output shape:", logits.shape)
+    print(logits)
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Total number of parameters: {total_params:,}")

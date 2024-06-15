@@ -3,10 +3,10 @@ import tiktoken
 import torch.nn as nn
 import os
 from dotenv import load_dotenv
-from gpt_architecture import GPTModel, GPT_CONFIG_124M
-from data_loader import create_dataloader
-from text_generation import TextGenerator
-from load_pretrained_weights import get_gpt_with_openai_gpt2_weights
+from gpt_architecture.custom_gpt import GPTModel, GPT_CONFIG_124M
+from pretrain.data_loader import create_dataloader
+from pretrain.text_generation import TextGenerator
+from pretrain.load_pretrained_weights import get_gpt_with_openai_gpt2_weights
 
 # Load environment variables from .env file
 load_dotenv()
@@ -80,7 +80,7 @@ def training_loop(model,train_dataloader,validation_dataloader, optimizer, devic
 
 
 if __name__ == "__main__":
-    with open("the-verdict.txt", "r", encoding="utf-8") as f:
+    with open("data/the-verdict.txt", "r", encoding="utf-8") as f:
         raw_text = f.read()
     
     train_ratio = 0.90
